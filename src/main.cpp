@@ -1,7 +1,7 @@
 #include "main.h"
 #include "timer.h"
 #include "ball.h"
-
+#include "water.h"
 using namespace std;
 
 GLMatrices Matrices;
@@ -13,6 +13,7 @@ GLFWwindow *window;
 **************************/
 
 Ball ball1;
+Water w;
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
@@ -30,9 +31,10 @@ void draw() {
     glUseProgram (programID);
 
     // Eye - Location of camera. Don't change unless you are sure!!
-    glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f), 0, 5*sin(camera_rotation_angle*M_PI/180.0f) );
+    //glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f), 0, 5*sin(camera_rotation_angle*M_PI/180.0f) );
+    glm::vec3 eye ( 0, 160, 180 );
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
-    glm::vec3 target (0, 0, 0);
+    glm::vec3 target (0, 100, 0);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
     glm::vec3 up (0, 1, 0);
 
@@ -52,19 +54,32 @@ void draw() {
 
     // Scene render
     ball1.draw(VP);
+    w.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
     int left  = glfwGetKey(window, GLFW_KEY_LEFT);
     int right = glfwGetKey(window, GLFW_KEY_RIGHT);
-    if (left) {
-        // Do something
+    int up = glfwGetKey(window, GLFW_KEY_UP);
+    int down = glfwGetKey(window, GLFW_KEY_DOWN);
+    int space = glfwGetKey(window, GLFW_KEY_SPACE);
+
+    if (up) {
+        ball1.position.z -= 0.5;
+    }
+    if (down) {
+        ball1.position.z += 0.5;
+    }
+    if(space){
+        ball1.speed = 0.5;
+        ball1.flag = 1;
+
     }
 }
 
 void tick_elements() {
     ball1.tick();
-    camera_rotation_angle += 1;
+    //camera_rotation_angle += 1;
 }
 
 /* Initialize the OpenGL rendering properties */
@@ -73,7 +88,8 @@ void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    ball1       = Ball(0, 0, COLOR_RED);
+    ball1 = Ball(0, 0, COLOR_RED);
+    w = Water( 0, 0, COLOR_BLUE);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -134,9 +150,10 @@ bool detect_collision(bounding_box_t a, bounding_box_t b) {
 }
 
 void reset_screen() {
-    float top    = screen_center_y + 4 / screen_zoom;
-    float bottom = screen_center_y - 4 / screen_zoom;
-    float left   = screen_center_x - 4 / screen_zoom;
-    float right  = screen_center_x + 4 / screen_zoom;
-    Matrices.projection = glm::ortho(left, right, bottom, top, 0.1f, 500.0f);
+    // float top    = screen_center_y + 4 / screen_zoom;
+    // float bottom = screen_center_y - 4 / screen_zoom;
+    // float left   = screen_center_x - 4 / screen_zoom;
+    // float right  = screen_center_x + 4 / screen_zoom;
+    // Matrices.projection = glm::ortho(left, right, bottom, top, 0.1f, 500.0f);
+    Matrices.projection = glm::perspective(45.0f, 1.0f, 100.0f, 500.0f);
 }
