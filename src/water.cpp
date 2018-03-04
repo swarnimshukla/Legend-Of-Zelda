@@ -23,7 +23,9 @@ Water::Water(float x, float y, color_t color) {
 }
 
 void Water::draw(glm::mat4 VP) {
-    Matrices.model = glm::mat4(1.0f);
+    Matrices.model = glm::
+
+            mat4(1.0f);
     glm::mat4 translate = glm::translate (this->position);    // glTranslatef
     glm::mat4 rotate    = glm::rotate((float) (this->rotation * M_PI / 180.0f), glm::vec3(1, 0, 0));
     // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
@@ -40,7 +42,7 @@ void Water::set_position(float x, float y) {
 }
 
 void Water::tick() {
-    this->rotation += speed;
+    // this->rotation += speed;
     // this->position.x -= speed;
     // this->position.y -= speed;
 }

@@ -53,6 +53,9 @@ void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods) {
 void keyboardChar(GLFWwindow *window, unsigned int key) {
     switch (key) {
     case 'Q':
+    case 'c':
+        choose_camera();
+        break;
     case 'q':
         quit(window);
         break;

@@ -1,68 +1,66 @@
 #include "ball.h"
 #include "main.h"
 
-Ball::Ball(float x, float y, color_t color) {
-    this->position = glm::vec3(x, y, 0);
+Ball::Ball(float x, float y, float z, color_t color) {
+    this->position = glm::vec3(x, y, z);
     this->rotation = 0;
     speed = 1;
-    gravity= -0.015;    
+    gravity= -0.02;    
     flag=0;
     i=0;
-    // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
-    // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     static const GLfloat vertex_buffer_data[] = {
         
-        8.0f, 4.0f, -12.0f,
-        -8.0f,4.0f, -12.0f,
-        0.0f,4.0f, -18.0f,
+        12.0f, 4.0f, -12.0f,
+        -12.0f,4.0f, -12.0f,
+        0.0f,4.0f, -22.0f,
 
-        -8.0f, 4.0f, -12.0f,
-        -8.0f,-4.0f,-12.0f,
-        0.0f, 4.0f, -18.0f,
+        -12.0f, 4.0f, -12.0f,
+        -12.0f,-4.0f,-12.0f,
+        0.0f, 4.0f, -22.0f,
 
-        8.0f, 4.0f, -12.0f,
-        8.0f,-4.0f,-12.0f,
-        0.0f, 4.0f, -18.0f,
+        12.0f, 4.0f, -12.0f,
+        12.0f,-4.0f,-12.0f,
+        0.0f, 4.0f, -22.0f,
 
-        8.0f,-4.0f,-12.0f,
-        -8.0f, -4.0f, -12.0f,
-        0.0f, 4.0f, -18.0f,
+        12.0f,-4.0f,-12.0f,
+        -12.0f, -4.0f, -12.0f,
+        0.0f, 4.0f, -22.0f,
 
         
-        -8.0f,-4.0f, 12.0f,
-         8.0f, 4.0f, 12.0f,
-        -8.0f, 4.0f, 12.0f,
-        -8.0f,-4.0f, 12.0f,
-         8.0f, 4.0f, 12.0f,
-         8.0f,-4.0f, 12.0f,
+        -12.0f,-4.0f, 12.0f,
+         12.0f, 4.0f, 12.0f,
+        -12.0f, 4.0f, 12.0f,
+        -12.0f,-4.0f, 12.0f,
+         12.0f, 4.0f, 12.0f,
+         12.0f,-4.0f, 12.0f,
 
-         8.0f, 4.0f, 12.0f,
-         8.0f,-4.0f,-12.0f,
-         8.0f,-4.0f, 12.0f,
-         8.0f, 4.0f, 12.0f,
-         8.0f,-4.0f,-12.0f,
-         8.0f, 4.0f,-12.0f,
+         12.0f, 4.0f, 12.0f,
+         12.0f,-4.0f,-12.0f,
+         12.0f,-4.0f, 12.0f,
+         12.0f, 4.0f, 12.0f,
+         12.0f,-4.0f,-12.0f,
+         12.0f, 4.0f,-12.0f,
 
-        8.0f, 4.0f,-12.0f,
-        -8.0f,-4.0f,-12.0f,
-         8.0f,-4.0f,-12.0f,
-         8.0f, 4.0f,-12.0f,
-        -8.0f,-4.0f,-12.0f,
-        -8.0f, 4.0f,-12.0f,
+        12.0f, 4.0f,-12.0f,
+        -12.0f,-4.0f,-12.0f,
+         12.0f,-4.0f,-12.0f,
+         12.0f, 4.0f,-12.0f,
+        -12.0f,-4.0f,-12.0f,
+        -12.0f, 4.0f,-12.0f,
 
-        -8.0f,-4.0f,-12.0f,
-        -8.0f, 4.0f, 12.0f,
-        -8.0f, 4.0f,-12.0f,
-        -8.0f,-4.0f,-12.0f,
-        -8.0f, 4.0f, 12.0f,
-        -8.0f,-4.0f, 12.0f,
+        -12.0f,-4.0f,-12.0f,
+        -12.0f, 4.0f, 12.0f,
+        -12.0f, 4.0f,-12.0f,
+        -12.0f,-4.0f,-12.0f,
+        -12.0f, 4.0f, 12.0f,
+        -12.0f,-4.0f, 12.0f,
 
-        -8.0f,-4.0f, 12.0f,
-         8.0f,-4.0f,-12.0f,
-         8.0f,-4.0f, 12.0f,
-        -8.0f,-4.0f, 12.0f,
-         8.0f,-4.0f,-12.0f,
-        -8.0f,-4.0f,-12.0f,
+        -12.0f,-4.0f, 12.0f,
+         12.0f,-4.0f,-12.0f,
+         12.0f,-4.0f, 12.0f,
+        -12.0f,-4.0f, 12.0f,
+         12.0f,-4.0f,-12.0f,
+        -12.0f,-4.0f,-12.0f,
 
         
         
@@ -100,12 +98,19 @@ void Ball::draw(glm::mat4 VP) {
     draw3DObject(this->object9);
 }
 
-void Ball::set_position(float x, float y) {
-    this->position = glm::vec3(x, y, 0);
+void Ball::set_position(float x, float y,float z) {
+    this->position = glm::vec3(x, y, z);
 }
 
 void Ball::tick() {
     // this->rotation += speed;
+    this->box.x = this->position.x;
+    this->box.y = this->position.y;
+    this->box.z = this->position.z;
+    this->box.height = 8;
+    this->box.width = 24;
+    this->box.length = 32;
+
     if(flag==1 && this->position.y >-4.1){
         this->position.y += speed;
         speed += gravity;

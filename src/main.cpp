@@ -2,6 +2,7 @@
 #include "timer.h"
 #include "ball.h"
 #include "water.h"
+#include "rocks.h"
 using namespace std;
 
 GLMatrices Matrices;
@@ -14,9 +15,16 @@ GLFWwindow *window;
 
 Ball ball1;
 Water w;
+int n=12,i,type=1;
+Rocks rock[30];
 
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
+float eye_x=0, eye_y=100, eye_z=140;
+float target_x=0, target_y=80, target_z=0;
+const float p = 3.14;
+int rock_z, rock_x;
+float angle;
 
 Timer t60(1.0 / 60);
 
@@ -32,9 +40,9 @@ void draw() {
 
     // Eye - Location of camera. Don't change unless you are sure!!
     //glm::vec3 eye ( 5*cos(camera_rotation_angle*M_PI/180.0f), 0, 5*sin(camera_rotation_angle*M_PI/180.0f) );
-    glm::vec3 eye ( 0, 160, 180 );
+    glm::vec3 eye ( eye_x, eye_y, eye_z );
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
-    glm::vec3 target (0, 100, 0);
+    glm::vec3 target (target_x, target_y, target_z);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
     glm::vec3 up (0, 1, 0);
 
@@ -55,6 +63,8 @@ void draw() {
     // Scene render
     ball1.draw(VP);
     w.draw(VP);
+    for(i=0;i<n;++i)
+        rock[i].draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -64,32 +74,59 @@ void tick_input(GLFWwindow *window) {
     int down = glfwGetKey(window, GLFW_KEY_DOWN);
     int space = glfwGetKey(window, GLFW_KEY_SPACE);
 
+
     if (up) {
-        ball1.position.z -= 0.5;
+        ball1.position.x -= (1 *sin(ball1.rotation * (p/180))) ;
+        ball1.position.z -= (1*cos(ball1.rotation * (p/180))) ;
+
     }
     if (down) {
-        ball1.position.z += 0.5;
+       ball1.position.x += (1 *sin(ball1.rotation * (p/180))) ;
+       ball1.position.z += (1*cos(ball1.rotation * (p/180))) ;
+
     }
     if(space){
         ball1.speed = 0.5;
         ball1.flag = 1;
-
     }
+    if(left){
+        move_left();
+    }
+    if(right){
+        move_right();
+    }
+        
 }
 
 void tick_elements() {
     ball1.tick();
+    for(i=0;i<n;++i)
+        rock[i].tick();
+    for(i=0;i<n;++i)
+        if(detect_collision(ball1.box, rock[i].box1))
+            printf("Hello\n");
+
     //camera_rotation_angle += 1;
 }
-
+void move_left(){
+    ball1.rotation += 0.5;
+}
+void move_right(){
+    ball1.rotation -= 0.5;
+}
 /* Initialize the OpenGL rendering properties */
 /* Add all the models to be created here */
 void initGL(GLFWwindow *window, int width, int height) {
     /* Objects should be created before any other gl function and shaders */
     // Create the models
 
-    ball1 = Ball(0, 0, COLOR_RED);
+    ball1 = Ball(0, 1, 0 , COLOR_RED);
     w = Water( 0, 0, COLOR_BLUE);
+    for( i=0;i<n;++i){
+        rock_x = (rand() % (200 + 1 + 200))-200;
+        rock_z = (rand() % (-70 + 1 + 300))-300;
+        rock[i] = Rocks(rock_x, -7, rock_z, COLOR_BROWN);
+    }
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -135,6 +172,8 @@ int main(int argc, char **argv) {
 
             tick_elements();
             tick_input(window);
+            camera_change();
+            // printf("%ld\n",ball1.position.y);
         }
 
         // Poll for Keyboard and mouse events
@@ -146,14 +185,57 @@ int main(int argc, char **argv) {
 
 bool detect_collision(bounding_box_t a, bounding_box_t b) {
     return (abs(a.x - b.x) * 2 < (a.width + b.width)) &&
-           (abs(a.y - b.y) * 2 < (a.height + b.height));
+           (abs(a.y - b.y) * 2 < (a.height + b.height)) &&
+           (abs(a.z - b.z) * 2 < (a.length + b.length));
 }
 
 void reset_screen() {
-    // float top    = screen_center_y + 4 / screen_zoom;
-    // float bottom = screen_center_y - 4 / screen_zoom;
-    // float left   = screen_center_x - 4 / screen_zoom;
-    // float right  = screen_center_x + 4 / screen_zoom;
-    // Matrices.projection = glm::ortho(left, right, bottom, top, 0.1f, 500.0f);
-    Matrices.projection = glm::perspective(45.0f, 1.0f, 100.0f, 500.0f);
+    Matrices.projection = glm::perspective(45.0f, 1.0f, 100.0f, 1000.0f);
+}
+void choose_camera(){
+    if(type!=5){
+            type++;
+    }
+    else if(type==5){
+        type=1;
+    }
+}
+void camera_change(){
+    angle = (ball1.rotation)*(p/180);
+    if(type==1){
+        eye_x = ball1.position.x + 0;
+        eye_y = 100;
+        eye_z = ball1.position.z + 170 ;
+
+        target_x = ball1.position.x + 0;
+        target_y = 80;
+        target_z = ball1.position.z + 0;
+    }
+    else if(type==2){
+        eye_x = ball1.position.x  ;
+        eye_y = ball1.position.y + 55.0f;
+        eye_z = ball1.position.z ;
+
+        target_x = ball1.position.x;
+        target_y = ball1.position.y+55.0f;
+        target_z = ball1.position.z - 22.0f;
+    }
+    else if(type==3){
+        eye_x = ball1.position.x;
+        eye_y = 500;
+        eye_z = ball1.position.z ;
+
+        target_x = ball1.position.x + 1;
+        target_y = ball1.position.y;
+        target_z = ball1.position.z;   
+    }
+    else if(type==4){
+        eye_x = ball1.position.x + 130 ;
+        eye_y = 280;
+        eye_z = ball1.position.z ;
+
+        target_x = ball1.position.x;
+        target_y = ball1.position.y;
+        target_z = ball1.position.z;
+    }
 }
