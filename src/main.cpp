@@ -3,6 +3,8 @@
 #include "ball.h"
 #include "water.h"
 #include "rocks.h"
+#include "cannon.h"
+#include "barrel.h"
 using namespace std;
 
 GLMatrices Matrices;
@@ -17,13 +19,14 @@ Ball ball1;
 Water w;
 int n=12,i,type=1;
 Rocks rock[30];
-
+Cannon can;
+Barrel bar[30];
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
-float eye_x=0, eye_y=100, eye_z=140;
+float eye_x=0, eye_y=120, eye_z=150;
 float target_x=0, target_y=80, target_z=0;
 const float p = 3.14;
-int rock_z, rock_x;
+int rock_z, rock_x, barrel_x, barrel_z;
 float angle;
 
 Timer t60(1.0 / 60);
@@ -65,6 +68,12 @@ void draw() {
     w.draw(VP);
     for(i=0;i<n;++i)
         rock[i].draw(VP);
+    can.draw(VP);
+    for(i=1;i<=n;++i){
+        bar[i].draw(VP);
+
+
+    }
 }
 
 void tick_input(GLFWwindow *window) {
@@ -78,12 +87,15 @@ void tick_input(GLFWwindow *window) {
     if (up) {
         ball1.position.x -= (1 *sin(ball1.rotation * (p/180))) ;
         ball1.position.z -= (1*cos(ball1.rotation * (p/180))) ;
+        can.position.x -= (1 *sin(can.rotation * (p/180)));
+        can.position.z -= (1 *cos(can.rotation * (p/180)));
 
     }
     if (down) {
        ball1.position.x += (1*sin(ball1.rotation * (p/180))) ;
        ball1.position.z += (1*cos(ball1.rotation * (p/180))) ;
-
+       can.position.x += (1 *sin(can.rotation * (p/180)));
+       can.position.z += (1 *cos(can.rotation * (p/180)));
     }
     if(space){
         ball1.speed = 0.5;
@@ -110,9 +122,12 @@ void tick_elements() {
 }
 void move_left(){
     ball1.rotation += 0.5;
+    can.rotation += 0.5;
 }
 void move_right(){
     ball1.rotation -= 0.5;
+    can.rotation -= 0.5;
+
 }
 /* Initialize the OpenGL rendering properties */
 /* Add all the models to be created here */
@@ -126,6 +141,14 @@ void initGL(GLFWwindow *window, int width, int height) {
         rock_x = (rand() % (200 + 1 + 200))-200;
         rock_z = (rand() % (-70 + 1 + 300))-300;
         rock[i] = Rocks(rock_x, -7, rock_z, COLOR_BROWN);
+    }
+    can = Cannon(0,0,0, COLOR_CANNON);
+    for(i=0;i<=n;++i){
+        barrel_x = (rand() % (500 + 1 + 500))-500;
+        barrel_z = (rand() % (-70 + 1 + 300))-300;
+        bar[i] = Barrel(barrel_x, -7, barrel_z, COLOR_BROWN);
+
+
     }
 
     // Create and compile our GLSL program from the shaders
@@ -147,6 +170,57 @@ void initGL(GLFWwindow *window, int width, int height) {
     cout << "RENDERER: " << glGetString(GL_RENDERER) << endl;
     cout << "VERSION: " << glGetString(GL_VERSION) << endl;
     cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+}
+void choose_camera(){
+    if(type!=5){
+            type++;
+    }
+    else if(type==5){
+        type=1;
+    }
+}
+void camera_change(){
+    if(type==1){
+        eye_x = ball1.position.x + 150*sin(ball1.rotation*(p/180));
+        eye_y = 100;
+        eye_z = ball1.position.z + 150*cos(ball1.rotation*(p/180));
+
+        target_x = ball1.position.x + sin(ball1.rotation*(p/180));
+        target_y = 80;
+        target_z = ball1.position.z + cos(ball1.rotation*(p/180));
+    }
+    else if(type==2){
+        eye_x = ball1.position.x;
+        eye_y = 500;
+        eye_z = ball1.position.z ;
+
+        target_x = ball1.position.x + 1;
+        target_y = ball1.position.y;
+        target_z = ball1.position.z;   
+
+
+    }
+    else if(type==3){
+        eye_x = ball1.position.x + 130 ;
+        eye_y = 280;
+        eye_z = ball1.position.z ;
+
+        target_x = ball1.position.x;
+        target_y = ball1.position.y;
+        target_z = ball1.position.z;
+
+
+    }
+    else if(type==4){
+        eye_x = ball1.position.x + 30*sin(ball1.rotation*(p/180) + p);
+        eye_y = ball1.position.y + 55.0f;
+        eye_z = ball1.position.z + 30*cos(ball1.rotation*(p/180) + p);
+
+        target_x = ball1.position.x + 40*sin(ball1.rotation*(p/180) + p);
+        target_y = ball1.position.y + 55.0f;
+        target_z = ball1.position.z + 40*cos(ball1.rotation*(p/180) + p);
+        
+    }
 }
 
 
@@ -191,51 +265,4 @@ bool detect_collision(bounding_box_t a, bounding_box_t b) {
 
 void reset_screen() {
     Matrices.projection = glm::perspective(45.0f, 1.0f, 100.0f, 1000.0f);
-}
-void choose_camera(){
-    if(type!=5){
-            type++;
-    }
-    else if(type==5){
-        type=1;
-    }
-}
-void camera_change(){
-    angle = (ball1.rotation)*(p/180);
-    if(type==1){
-        eye_x = ball1.position.x + 140*sin(angle);
-        eye_y = 100;
-        eye_z = ball1.position.z + 140*cos(angle);
-
-        target_x = ball1.position.x + sin(angle);
-        target_y = 80;
-        target_z = ball1.position.z + cos(angle);
-    }
-    else if(type==2){
-        eye_x = ball1.position.x + 30*sin(angle + p);
-        eye_y = ball1.position.y + 55.0f;
-        eye_z = ball1.position.z + 30*cos(angle + p);
-
-        target_x = ball1.position.x + 40*sin(angle + p);
-        target_y = ball1.position.y + 55.0f;
-        target_z = ball1.position.z + 40*cos(angle + p);
-    }
-    else if(type==3){
-        eye_x = ball1.position.x;
-        eye_y = 500;
-        eye_z = ball1.position.z ;
-
-        target_x = ball1.position.x + 1;
-        target_y = ball1.position.y;
-        target_z = ball1.position.z;   
-    }
-    else if(type==4){
-        eye_x = ball1.position.x + 130 ;
-        eye_y = 280;
-        eye_z = ball1.position.z ;
-
-        target_x = ball1.position.x;
-        target_y = ball1.position.y;
-        target_z = ball1.position.z;
-    }
 }

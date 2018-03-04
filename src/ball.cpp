@@ -62,6 +62,35 @@ Ball::Ball(float x, float y, float z, color_t color) {
          12.0f,-4.0f,-12.0f,
         -12.0f,-4.0f,-12.0f,
 
+
+        12.0f, 4.0f, 12.0f,
+        -12.0f,4.0f, 12.0f,
+        0.0f,4.0f, 22.0f,
+
+        -12.0f, 4.0f, 12.0f,
+        -12.0f,-4.0f,12.0f,
+        0.0f, 4.0f, 22.0f,
+
+        12.0f, 4.0f, 12.0f,
+        12.0f,-4.0f,12.0f,
+        0.0f, 4.0f, 22.0f,
+
+        12.0f,-4.0f,12.0f,
+        -12.0f, -4.0f, 12.0f,
+        0.0f, 4.0f, 22.0f,
+
+        0.0f, -4.0f, 0.0f,
+        3.0f, -4.0f, 0.0f,
+        1.5f,40.0f, 0.0f,
+        
+        1.6f, 35.0f, 0.0f,
+        1.7f,25.0f, 0.0f,
+        14.5f,30.0f, 0.0f,
+
+
+
+
+
         
         
     };
@@ -75,6 +104,13 @@ Ball::Ball(float x, float y, float z, color_t color) {
     this->object7 = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data + 72, COLOR_RED, GL_FILL);
     this->object8 = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data + 90, COLOR_YELLOW, GL_FILL);
     this->object9 = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data + 108, COLOR_LIME, GL_FILL);
+    this->object10 = create3DObject(GL_TRIANGLES, 3, vertex_buffer_data + 126, COLOR_GREEN, GL_FILL);
+    this->object11 = create3DObject(GL_TRIANGLES, 3, vertex_buffer_data + 135, COLOR_GREEN, GL_FILL);
+    this->object12 = create3DObject(GL_TRIANGLES, 3, vertex_buffer_data + 144, COLOR_GREEN, GL_FILL);
+    this->object13 = create3DObject(GL_TRIANGLES, 3, vertex_buffer_data + 153, COLOR_GREEN, GL_FILL);
+    this->object14 = create3DObject(GL_TRIANGLES, 3, vertex_buffer_data + 162, COLOR_BROWN, GL_FILL);
+    this->object15 = create3DObject(GL_TRIANGLES, 3, vertex_buffer_data + 171, COLOR_RED, GL_FILL);
+    
     
 }
 
@@ -96,6 +132,15 @@ void Ball::draw(glm::mat4 VP) {
     draw3DObject(this->object7);
     draw3DObject(this->object8);
     draw3DObject(this->object9);
+    draw3DObject(this->object10);
+    draw3DObject(this->object11);
+    draw3DObject(this->object12);
+    draw3DObject(this->object13);
+    draw3DObject(this->object14);
+    draw3DObject(this->object15);
+
+
+
 }
 
 void Ball::set_position(float x, float y,float z) {

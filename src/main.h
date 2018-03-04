@@ -93,4 +93,5 @@ extern const color_t COLOR_BLUE;
 extern const color_t COLOR_FUCHSIA;
 extern const color_t COLOR_PURPLE;
 extern const color_t COLOR_LIME;
+extern const color_t COLOR_CANNON;
 #endif

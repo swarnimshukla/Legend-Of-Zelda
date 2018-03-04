@@ -28,6 +28,13 @@ private:
     VAO *object7;
     VAO *object8;
     VAO *object9;
+    VAO *object10;
+    VAO *object11;
+    VAO *object12;
+    VAO *object13;
+    VAO *object14;
+    VAO *object15;
+
 };
 
 #endif // BALL_H
