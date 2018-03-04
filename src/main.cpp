@@ -81,7 +81,7 @@ void tick_input(GLFWwindow *window) {
 
     }
     if (down) {
-       ball1.position.x += (1 *sin(ball1.rotation * (p/180))) ;
+       ball1.position.x += (1*sin(ball1.rotation * (p/180))) ;
        ball1.position.z += (1*cos(ball1.rotation * (p/180))) ;
 
     }
@@ -203,22 +203,22 @@ void choose_camera(){
 void camera_change(){
     angle = (ball1.rotation)*(p/180);
     if(type==1){
-        eye_x = ball1.position.x + 0;
+        eye_x = ball1.position.x + 140*sin(angle);
         eye_y = 100;
-        eye_z = ball1.position.z + 170 ;
+        eye_z = ball1.position.z + 140*cos(angle);
 
-        target_x = ball1.position.x + 0;
+        target_x = ball1.position.x + sin(angle);
         target_y = 80;
-        target_z = ball1.position.z + 0;
+        target_z = ball1.position.z + cos(angle);
     }
     else if(type==2){
-        eye_x = ball1.position.x  ;
+        eye_x = ball1.position.x + 30*sin(angle + p);
         eye_y = ball1.position.y + 55.0f;
-        eye_z = ball1.position.z ;
+        eye_z = ball1.position.z + 30*cos(angle + p);
 
-        target_x = ball1.position.x;
-        target_y = ball1.position.y+55.0f;
-        target_z = ball1.position.z - 22.0f;
+        target_x = ball1.position.x + 40*sin(angle + p);
+        target_y = ball1.position.y + 55.0f;
+        target_z = ball1.position.z + 40*cos(angle + p);
     }
     else if(type==3){
         eye_x = ball1.position.x;
