@@ -1,29 +1,33 @@
-#include "cannon.h"
+#include "gifts.h"
 #include "main.h"
 
-Cannon::Cannon(float x, float y, float z, color_t color) {
+Gifts::Gifts(float x, float y, float z, color_t color) {
     this->position = glm::vec3(x, y, z);
     this->rotation = 0;
     speed = 1;
     gravity = -0.1;
-    static const GLfloat vertex_buffer_data[] = {
-        -2.0f, 2.0f, -12.0f,
-        2.0f,2.0f, -12.0f,
-        2.0f,2.0f, -52.0f,
+    this->b.x = this->position.x;
+    this->b.y = this->position.y;
+    this->b.z = this->position.z;
 
-        -2.0f, 2.0f, -12.0f,
-        -2.0f,2.0f, -52.0f,
-        2.0f,2.0f, -52.0f,
+    static const GLfloat vertex_buffer_data[] = {
+        0.0f, 10.0f, 0.0f,
+        0.0f,-10.0f, 0.0f,
+        20.0f,3.0f, 0.0f,
+
+        0.0f, 10.0f, 0.0f,
+        0.0f,-10.0f, 0.0f,
+        -20.0f,2.0f, 0.0f,
 
 
         
     };
-    this->object = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data, COLOR_CANNON, GL_FILL);
+    this->object = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data, COLOR_GIFTS, GL_FILL);
 
 
 }
 
-void Cannon::draw(glm::mat4 VP) {
+void Gifts::draw(glm::mat4 VP) {
     Matrices.model = glm::
 
             mat4(1.0f);
@@ -38,22 +42,16 @@ void Cannon::draw(glm::mat4 VP) {
     
 }
 
-void Cannon::set_position(float x, float y) {
+void Gifts::set_position(float x, float y) {
     this->position = glm::vec3(x, y, 0);
 }
 
-void Cannon::tick() {
-    // this->rotation += speed;
-    // this->position.x -= speed;
-    // this->position.y -= speed;
-     if(flag==1 && this->position.y >-4.1){
-        this->position.y += speed;
-        speed += gravity;
-    }
-    if(this->position.y<= -4.1){
-        while(this->position.y<0)
-            this->position.y += 0.2;
-        flag=0;
-    }
+void Gifts::tick() {
+    this->b.x = this->position.x;
+    this->b.y = this->position.y;
+    this->b.z = this->position.z;
+    this->b.height = 30;
+    this->b.width = 50;
+    this->b.length = 5;      
 }
 

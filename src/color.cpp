@@ -11,5 +11,8 @@ const color_t COLOR_FUCHSIA = { 255,20,147  };
 const color_t COLOR_PURPLE = { 243, 156, 18 };
 const color_t COLOR_LIME = { 0, 128, 128 };
 const color_t COLOR_CANNON = { 192, 57, 43};
+const color_t COLOR_BARREL = { 100, 30, 22};
+const color_t COLOR_GIFTS = { 125, 60, 152};
+const color_t COLOR_MONSTERS = { 186, 74, 0};
 
 

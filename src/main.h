@@ -19,6 +19,8 @@ struct color_t {
     int g;
     int b;
 };
+void move_cannon_right();
+void move_cannon_left();
 
 // nonedit.cpp
 GLFWwindow *initGLFW(int width, int height);
@@ -28,11 +30,14 @@ struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat
 struct VAO *create3DObject(GLenum primitive_mode, int numVertices, const GLfloat *vertex_buffer_data, const color_t color, GLenum fill_mode = GL_FILL);
 void       draw3DObject(struct VAO *vao);
 
+
 // input.cpp
 void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods);
 void keyboardChar(GLFWwindow *window, unsigned int key);
 void mouseButton(GLFWwindow *window, int button, int action, int mods);
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
+void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos);
+
 
 // other_handlers.cpp
 void error_callback(int error, const char *description);
@@ -94,4 +99,8 @@ extern const color_t COLOR_FUCHSIA;
 extern const color_t COLOR_PURPLE;
 extern const color_t COLOR_LIME;
 extern const color_t COLOR_CANNON;
+extern const color_t COLOR_BARREL;
+extern const color_t COLOR_GIFTS;
+extern const color_t COLOR_MONSTERS;
+
 #endif

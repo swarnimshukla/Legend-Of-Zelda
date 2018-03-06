@@ -5,7 +5,7 @@ Ball::Ball(float x, float y, float z, color_t color) {
     this->position = glm::vec3(x, y, z);
     this->rotation = 0;
     speed = 1;
-    gravity= -0.02;    
+    gravity= -0.1;    
     flag=0;
     i=0;
     static const GLfloat vertex_buffer_data[] = {

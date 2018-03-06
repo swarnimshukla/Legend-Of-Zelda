@@ -14,8 +14,10 @@
 #include "main.h"
 
 bool   cannon_keyboard_input = true;
-bool   drag_pan = false, old_cki;
+bool   drag_pan = false, old_cki, lbutton_down = false;;
 double drag_oldx = -1, drag_oldy = -1;
+double px, py, x=-20, y=-20;
+
 
 using namespace std;
 
@@ -70,9 +72,15 @@ void mouseButton(GLFWwindow *window, int button, int action, int mods) {
     case GLFW_MOUSE_BUTTON_LEFT:
         if (action == GLFW_PRESS) {
             // Do something
-            return;
+            lbutton_down = true;
+            glfwGetCursorPos(window, &x, &y);
+                    px = x;
+                    py = y;
+                    cursorPositionCallback(window, px, py);
+            //return;
         } else if (action == GLFW_RELEASE) {
             // Do something
+            lbutton_down = false;
         }
         break;
     // case GLFW_MOUSE_BUTTON_RIGHT:
@@ -85,6 +93,20 @@ void mouseButton(GLFWwindow *window, int button, int action, int mods) {
     }
 }
 
+void cursorPositionCallback(GLFWwindow* window, double xpos, double ypos)
+{
+    if(lbutton_down){
+        if(xpos-px>0){
+            move_cannon_right();
+        }
+        else{
+            move_cannon_left();
+        }
+        px = xpos;
+    }
+}
+
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset) {
     // Do something
 }
+     

@@ -5,6 +5,9 @@
 #include "rocks.h"
 #include "cannon.h"
 #include "barrel.h"
+#include "gifts.h"
+#include "monster.h"
+#include "fireball.h"
 using namespace std;
 
 GLMatrices Matrices;
@@ -17,16 +20,19 @@ GLFWwindow *window;
 
 Ball ball1;
 Water w;
-int n=12,i,type=1;
+int n=20,i,type=1;
 Rocks rock[30];
 Cannon can;
 Barrel bar[30];
+Gifts gift[30];
+Monster monster[30];
+Fireball fire;
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
 float eye_x=0, eye_y=120, eye_z=150;
 float target_x=0, target_y=80, target_z=0;
 const float p = 3.14;
-int rock_z, rock_x, barrel_x, barrel_z;
+int rock_z, rock_x, barrel_x, barrel_z, monster_x, monster_z;
 float angle;
 
 Timer t60(1.0 / 60);
@@ -71,9 +77,12 @@ void draw() {
     can.draw(VP);
     for(i=1;i<=n;++i){
         bar[i].draw(VP);
-
-
+        gift[i].draw(VP);
     }
+    for(i=1;i<n;++i)
+        monster[i].draw(VP);
+
+    fire.draw(VP);
 }
 
 void tick_input(GLFWwindow *window) {
@@ -82,24 +91,41 @@ void tick_input(GLFWwindow *window) {
     int up = glfwGetKey(window, GLFW_KEY_UP);
     int down = glfwGetKey(window, GLFW_KEY_DOWN);
     int space = glfwGetKey(window, GLFW_KEY_SPACE);
+    int f= glfwGetKey(window, GLFW_KEY_F);
+    int d= glfwGetKey(window, GLFW_KEY_D);
+    int a= glfwGetKey(window, GLFW_KEY_A);
+
 
 
     if (up) {
-        ball1.position.x -= (1 *sin(ball1.rotation * (p/180))) ;
-        ball1.position.z -= (1*cos(ball1.rotation * (p/180))) ;
-        can.position.x -= (1 *sin(can.rotation * (p/180)));
-        can.position.z -= (1 *cos(can.rotation * (p/180)));
+        ball1.position.x -= (2.5 *sin(ball1.rotation * (p/180))) ;
+        ball1.position.z -= (2.5*cos(ball1.rotation * (p/180))) ;
+        can.position.x -= (2.5 *sin(ball1.rotation * (p/180)));
+        can.position.z -= (2.5 *cos(ball1.rotation * (p/180)));
+        if(fire.position.y<=-8){
+            fire.position.x -= (2.5 *sin(ball1.rotation * (p/180)));
+            fire.position.z -= (2.5 *cos(ball1.rotation * (p/180)));
+        }
 
     }
     if (down) {
-       ball1.position.x += (1*sin(ball1.rotation * (p/180))) ;
-       ball1.position.z += (1*cos(ball1.rotation * (p/180))) ;
-       can.position.x += (1 *sin(can.rotation * (p/180)));
-       can.position.z += (1 *cos(can.rotation * (p/180)));
+       ball1.position.x += (2.5*sin(ball1.rotation * (p/180))) ;
+       ball1.position.z += (2.5*cos(ball1.rotation * (p/180))) ;
+       can.position.x += (2.5 *sin(ball1.rotation * (p/180)));
+       can.position.z += (2.5 *cos(ball1.rotation * (p/180)));
+       if(fire.position.y<=-8){
+            fire.position.x += (2.5 *sin(ball1.rotation * (p/180)));
+            fire.position.z += (2.5 *cos(ball1.rotation * (p/180)));
+        }
     }
     if(space){
-        ball1.speed = 0.5;
-        ball1.flag = 1;
+        if(ball1.position.y <=1){
+            ball1.speed = 3;
+            ball1.flag = 1;
+            can.speed = 3;
+            can.flag = 1;
+        }   
+
     }
     if(left){
         move_left();
@@ -107,26 +133,86 @@ void tick_input(GLFWwindow *window) {
     if(right){
         move_right();
     }
+    if(d)
+        move_cannon_right();
+    if(a)
+        move_cannon_left();
+    if(f && fire.position.y <= -8){
+        fire.speedy = 3.5;
+        fire.flag=1;
+        fire.speedx = -3.5 * sin(fire.rotation * (p/180));
+        fire.speedz = -3.5 * cos(fire.rotation * (p/180));
+     }
         
 }
 
 void tick_elements() {
     ball1.tick();
-    for(i=0;i<n;++i)
+    for(i=0;i<=n;++i)
         rock[i].tick();
-    for(i=0;i<n;++i)
-        if(detect_collision(ball1.box, rock[i].box1))
-            printf("Hello\n");
+    for(i=0;i<=n;++i)
+        if(detect_collision(ball1.box, rock[i].box1)){
+            rock[i].position.y=-100;
+        }
+    can.tick();    
+    for(int i=0;i<n;++i){
+        if(abs(monster[i].position.x - ball1.position.x)<600 && abs(monster[i].position.z - ball1.position.z)<600){
+            if(monster[i].position.x > ball1.position.x ){
+               monster[i].position.x -= 0.3 *(i%3+1);
+            }
+            else if(monster[i].position.x < ball1.position.x){
+               monster[i].position.x += 0.3 *(i%3+1);
+            }
+            if(monster[i].position.z > ball1.position.z ){
+               monster[i].position.z -= 0.3 *(i%3+1);
+            }
+            else if(monster[i].position.z < ball1.position.z){
+               monster[i].position.z += 0.3 *(i%3+1);
+            }
+        }
+    }
+    if(fire.flag==1){
+        fire.tick();
+        if(fire.position.y<-8){
+            fire.position.y=-8;
+            fire.position.x= can.position.x;
+            fire.position.z= can.position.z-10;
 
-    //camera_rotation_angle += 1;
+        }
+    }
+    for(int i=0;i<=n;++i)
+        if(detect_collision(ball1.box, gift[i].b)){
+            gift[i].position.y = -100;
+        }
+    for(int i=0;i<n;++i)
+        if(detect_collision(fire.box1, monster[i].box1))
+            printf("Hekmskvmkvmsdlmvsdvmklsvmkmdskllo");
+
+    for(int i=0;i<n;++i)
+        if(detect_collision(ball1.box, monster[i].box1))
+            printf("Hello");
+        
+
 }
 void move_left(){
     ball1.rotation += 0.5;
     can.rotation += 0.5;
+    fire.rotation = can.rotation;
 }
 void move_right(){
     ball1.rotation -= 0.5;
     can.rotation -= 0.5;
+    fire.rotation = can.rotation;
+
+}
+void move_cannon_left(){
+    can.rotation += 0.5;
+    fire.rotation = can.rotation;
+
+}
+void move_cannon_right(){
+    can.rotation -= 0.5;
+    fire.rotation = can.rotation;
 
 }
 /* Initialize the OpenGL rendering properties */
@@ -137,19 +223,32 @@ void initGL(GLFWwindow *window, int width, int height) {
 
     ball1 = Ball(0, 1, 0 , COLOR_RED);
     w = Water( 0, 0, COLOR_BLUE);
-    for( i=0;i<n;++i){
-        rock_x = (rand() % (200 + 1 + 200))-200;
-        rock_z = (rand() % (-70 + 1 + 300))-300;
+    for( i=0;i<50;++i){
+        rock_x = (rand() % (-300 + 1 + 1800))-1800;
+        rock_z = (rand() % (-300 + 1 + 1200))-1200;
         rock[i] = Rocks(rock_x, -7, rock_z, COLOR_BROWN);
     }
     can = Cannon(0,0,0, COLOR_CANNON);
     for(i=0;i<=n;++i){
-        barrel_x = (rand() % (500 + 1 + 500))-500;
-        barrel_z = (rand() % (-70 + 1 + 300))-300;
-        bar[i] = Barrel(barrel_x, -7, barrel_z, COLOR_BROWN);
-
-
+        barrel_x = (rand() % (-300 + 1 + 1800))-1800;
+        barrel_z = (rand() % (-950 + 1 + 2200))-2200;
+        bar[i] = Barrel(barrel_x, -17, barrel_z, COLOR_BARREL);
+        gift[i] = Gifts(barrel_x, 27, barrel_z, COLOR_GIFTS);
     }
+
+    for(i=0; i<n; ++i){
+        if(i!=15){
+            monster_x = ((((i+1)*rand()+i*584)%10000)/10) + 30;
+            monster_z = (rand() % (-450 + 1 + 5200))-5200;
+            monster[i] = Monster(monster_x, 0, monster_z, COLOR_MONSTERS,1);
+        }
+        else{
+            monster_x = ((((i+1)*rand()+i*584)%10000)/10) + 30;
+            monster_z = (rand() % (-450 + 1 + 5200))-5200;
+            monster[i] = Monster(200, 0, -800, COLOR_MONSTERS,2);
+        }
+    }
+    fire = Fireball(can.position.x, -8, can.position.z, COLOR_BACKGROUND);
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -170,6 +269,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     cout << "RENDERER: " << glGetString(GL_RENDERER) << endl;
     cout << "VERSION: " << glGetString(GL_VERSION) << endl;
     cout << "GLSL: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << endl;
+        
 }
 void choose_camera(){
     if(type!=5){
@@ -191,7 +291,7 @@ void camera_change(){
     }
     else if(type==2){
         eye_x = ball1.position.x;
-        eye_y = 500;
+        eye_y = 800;
         eye_z = ball1.position.z ;
 
         target_x = ball1.position.x + 1;
@@ -202,7 +302,7 @@ void camera_change(){
     }
     else if(type==3){
         eye_x = ball1.position.x + 130 ;
-        eye_y = 280;
+        eye_y = 580;
         eye_z = ball1.position.z ;
 
         target_x = ball1.position.x;
@@ -212,13 +312,13 @@ void camera_change(){
 
     }
     else if(type==4){
-        eye_x = ball1.position.x + 30*sin(ball1.rotation*(p/180) + p);
+        eye_x = ball1.position.x + sin(ball1.rotation*(p/180) + p);
         eye_y = ball1.position.y + 55.0f;
-        eye_z = ball1.position.z + 30*cos(ball1.rotation*(p/180) + p);
+        eye_z = ball1.position.z + cos(ball1.rotation*(p/180) + p);
 
-        target_x = ball1.position.x + 40*sin(ball1.rotation*(p/180) + p);
+        target_x = ball1.position.x + 30*sin(ball1.rotation*(p/180) + p);
         target_y = ball1.position.y + 55.0f;
-        target_z = ball1.position.z + 40*cos(ball1.rotation*(p/180) + p);
+        target_z = ball1.position.z + 30*cos(ball1.rotation*(p/180) + p);
         
     }
 }
@@ -247,7 +347,6 @@ int main(int argc, char **argv) {
             tick_elements();
             tick_input(window);
             camera_change();
-            // printf("%ld\n",ball1.position.y);
         }
 
         // Poll for Keyboard and mouse events

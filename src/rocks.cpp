@@ -5,6 +5,9 @@ Rocks::Rocks(float x, float y, float z, color_t color) {
     this->position = glm::vec3(x, y, z);
     this->rotation = 0;
     speed = 1;
+    this->box1.x = this->position.x;
+    this->box1.y = this->position.y;
+    this->box1.z = this->position.z;
     static const GLfloat vertex_buffer_data[] = {
        -7.0f,-7.0f,-7.0f, // triangle 1 : begin
         -7.0f,-7.0f, 7.0f,
