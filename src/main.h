@@ -81,11 +81,16 @@ struct bounding_box_t {
 bool detect_collision(bounding_box_t a, bounding_box_t b);
 
 extern float screen_zoom, screen_center_x, screen_center_y;
+extern int pid;
 void reset_screen();
 void camera_change();
 void choose_camera();
 void move_left();
 void move_right();
+
+void audio_init();
+void audio_play();
+void audio_close();
 
 // ---- Colors ----
 extern const color_t COLOR_RED;
@@ -102,5 +107,7 @@ extern const color_t COLOR_CANNON;
 extern const color_t COLOR_BARREL;
 extern const color_t COLOR_GIFTS;
 extern const color_t COLOR_MONSTERS;
+extern const color_t COLOR_ISLAND;
+
 
 #endif

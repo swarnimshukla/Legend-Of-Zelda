@@ -8,6 +8,12 @@
 #include "gifts.h"
 #include "monster.h"
 #include "fireball.h"
+#include "health.h"
+#include "booster.h"
+#include "island.h"
+#include "unistd.h"
+#include "sys/types.h"
+
 using namespace std;
 
 GLMatrices Matrices;
@@ -20,19 +26,24 @@ GLFWwindow *window;
 
 Ball ball1;
 Water w;
-int n=20,i,type=1;
+int n=20,i,type=1, pid;
 Rocks rock[30];
 Cannon can;
 Barrel bar[30];
-Gifts gift[30];
+Gifts gift[32];
+int health=100, score=0;
+Health heal[6];
 Monster monster[30];
+Booster boos;
+Islands island;
+int factor=1, count=10;
 Fireball fire;
 float screen_zoom = 1, screen_center_x = 0, screen_center_y = 0;
 float camera_rotation_angle = 0;
 float eye_x=0, eye_y=120, eye_z=150;
 float target_x=0, target_y=80, target_z=0;
 const float p = 3.14;
-int rock_z, rock_x, barrel_x, barrel_z, monster_x, monster_z;
+int rock_z, rock_x, barrel_x, barrel_z, monster_x, monster_z, health_x, health_z;
 float angle;
 
 Timer t60(1.0 / 60);
@@ -79,10 +90,28 @@ void draw() {
         bar[i].draw(VP);
         gift[i].draw(VP);
     }
-    for(i=1;i<n;++i)
+    for(i=0;i<n;++i)
         monster[i].draw(VP);
 
     fire.draw(VP);
+     for(i=0;i<5;++i)
+        heal[i].draw(VP);
+
+    boos.draw(VP);
+    island.draw(VP);
+
+}
+
+void displayScore(){
+    string a = "Score : ";
+    string b = to_string(score);
+    b = a+b;
+    string c = " Health : ";
+    string d= to_string(health);
+    d = c + d;
+    b = b + d;
+
+    glfwSetWindowTitle(window, const_cast<char*>(b.c_str()));
 }
 
 void tick_input(GLFWwindow *window) {
@@ -98,28 +127,28 @@ void tick_input(GLFWwindow *window) {
 
 
     if (up) {
-        ball1.position.x -= (2.5 *sin(ball1.rotation * (p/180))) ;
-        ball1.position.z -= (2.5*cos(ball1.rotation * (p/180))) ;
-        can.position.x -= (2.5 *sin(ball1.rotation * (p/180)));
-        can.position.z -= (2.5 *cos(ball1.rotation * (p/180)));
+        ball1.position.x -= (factor*2.5 *sin(ball1.rotation * (p/180))) ;
+        ball1.position.z -= (factor*2.5*cos(ball1.rotation * (p/180))) ;
+        can.position.x -= (factor*2.5 *sin(ball1.rotation * (p/180)));
+        can.position.z -= (factor*2.5 *cos(ball1.rotation * (p/180)));
         if(fire.position.y<=-8){
-            fire.position.x -= (2.5 *sin(ball1.rotation * (p/180)));
-            fire.position.z -= (2.5 *cos(ball1.rotation * (p/180)));
+            fire.position.x -= (factor*2.5 *sin(ball1.rotation * (p/180)));
+            fire.position.z -= (factor*2.5 *cos(ball1.rotation * (p/180)));
         }
 
     }
     if (down) {
-       ball1.position.x += (2.5*sin(ball1.rotation * (p/180))) ;
-       ball1.position.z += (2.5*cos(ball1.rotation * (p/180))) ;
-       can.position.x += (2.5 *sin(ball1.rotation * (p/180)));
-       can.position.z += (2.5 *cos(ball1.rotation * (p/180)));
+       ball1.position.x += (factor*2.5*sin(ball1.rotation * (p/180))) ;
+       ball1.position.z += (factor*2.5*cos(ball1.rotation * (p/180))) ;
+       can.position.x += (factor*2.5 *sin(ball1.rotation * (p/180)));
+       can.position.z += (factor*2.5 *cos(ball1.rotation * (p/180)));
        if(fire.position.y<=-8){
-            fire.position.x += (2.5 *sin(ball1.rotation * (p/180)));
-            fire.position.z += (2.5 *cos(ball1.rotation * (p/180)));
+            fire.position.x += (factor*2.5 *sin(ball1.rotation * (p/180)));
+            fire.position.z += (factor*2.5 *cos(ball1.rotation * (p/180)));
         }
     }
     if(space){
-        if(ball1.position.y <=1){
+        if(ball1.position.y <=2){
             ball1.speed = 3;
             ball1.flag = 1;
             can.speed = 3;
@@ -137,22 +166,33 @@ void tick_input(GLFWwindow *window) {
         move_cannon_right();
     if(a)
         move_cannon_left();
-    if(f && fire.position.y <= -8){
-        fire.speedy = 3.5;
+    if(f && fire.position.y <= -30){
+        fire.speedy = 4.5;
         fire.flag=1;
-        fire.speedx = -3.5 * sin(fire.rotation * (p/180));
-        fire.speedz = -3.5 * cos(fire.rotation * (p/180));
+        fire.speedx = -4.5 * sin(fire.rotation * (p/180));
+        fire.speedz = -4.5 * cos(fire.rotation * (p/180));
      }
         
 }
 
 void tick_elements() {
     ball1.tick();
+    boos.tick();
+
+    for(i=0;i<n;++i){
+        monster[i].tick();
+        gift[i].tick();
+
+    }
+    for(i=0;i<=5;++i)
+        heal[i].tick();
     for(i=0;i<=n;++i)
         rock[i].tick();
     for(i=0;i<=n;++i)
         if(detect_collision(ball1.box, rock[i].box1)){
             rock[i].position.y=-100;
+            health -= 5;
+
         }
     can.tick();    
     for(int i=0;i<n;++i){
@@ -173,45 +213,101 @@ void tick_elements() {
     }
     if(fire.flag==1){
         fire.tick();
-        if(fire.position.y<-8){
-            fire.position.y=-8;
+        if(fire.position.y<-30){
+            fire.position.y=-30;
             fire.position.x= can.position.x;
             fire.position.z= can.position.z-10;
 
         }
     }
-    for(int i=0;i<=n;++i)
+    for(int i=0;i<=n;++i){
         if(detect_collision(ball1.box, gift[i].b)){
-            gift[i].position.y = -100;
-        }
-    for(int i=0;i<n;++i)
-        if(detect_collision(fire.box1, monster[i].box1))
-            printf("Hekmskvmkvmsdlmvsdvmklsvmkmdskllo");
+            gift[i].position.x = -1000;
+            gift[i].position.y = -1000;
+            gift[i].position.z = -1000;
 
-    for(int i=0;i<n;++i)
-        if(detect_collision(ball1.box, monster[i].box1))
-            printf("Hello");
-        
+            if(i%3==0){
+                score+=10;
+                break;
+            }
+            else if(i%3==1){
+                score+=20;
+                break;
+            }
+            else if(i%3==2){
+                score+=30;
+                break;
+            }
+
+        }
+    }
+    for(int i=0;i<n;++i){
+        if(detect_collision(fire.box1, monster[i].box1)){
+            if(i==15){
+                monster[i].position.y=-100;
+                score +=50;
+                boos.position.x=monster[i].position.x;
+                boos.position.y=monster[i].position.y  + 130;
+                boos.position.z=monster[i].position.z;
+            }
+            else{
+                monster[i].position.y=-100;
+                score +=50;
+            }
+        }
+    }
+    for(int i=0;i<n;++i){
+        if(detect_collision(ball1.box, monster[i].box1)){
+            monster[i].position.y=-100;
+            health -= 10;
+
+        }
+
+    }
+    for(int i=0;i<5;++i){
+        if(detect_collision(ball1.box, heal[i].box1)){
+            heal[i].position.y=-100;
+            health += 50;
+        }
+    }
+
+
+    if(detect_collision(ball1.box, boos.box1)){
+        boos.position.y=-100;
+        factor=2;
+
+    }
+    if(count>0){
+        ball1.position.y-=0.1;
+        count--;
+    }
+    else{
+        ball1.position.y+=0.1;
+        if(count==-10)
+            count=10;
+        count--;
+    }
+
 
 }
 void move_left(){
-    ball1.rotation += 0.5;
-    can.rotation += 0.5;
+    ball1.rotation += factor*0.5;
+    can.rotation += factor*0.5;
     fire.rotation = can.rotation;
 }
 void move_right(){
-    ball1.rotation -= 0.5;
-    can.rotation -= 0.5;
+    ball1.rotation -= factor*0.5;
+    can.rotation -= factor*0.5;
     fire.rotation = can.rotation;
 
 }
 void move_cannon_left(){
-    can.rotation += 0.5;
+    can.rotation += factor*0.5;
     fire.rotation = can.rotation;
 
 }
 void move_cannon_right(){
-    can.rotation -= 0.5;
+    can.rotation -= factor*0.5;
     fire.rotation = can.rotation;
 
 }
@@ -233,8 +329,16 @@ void initGL(GLFWwindow *window, int width, int height) {
         barrel_x = (rand() % (-300 + 1 + 1800))-1800;
         barrel_z = (rand() % (-950 + 1 + 2200))-2200;
         bar[i] = Barrel(barrel_x, -17, barrel_z, COLOR_BARREL);
-        gift[i] = Gifts(barrel_x, 27, barrel_z, COLOR_GIFTS);
-    }
+        if(i%3==0)
+            gift[i] = Gifts(barrel_x, 33, barrel_z, COLOR_GIFTS);
+        else if(i%3==1)
+            gift[i] = Gifts(barrel_x, 33, barrel_z, COLOR_RED);
+        else if(i%3==2)
+            gift[i] = Gifts(barrel_x, 33, barrel_z, COLOR_FUCHSIA);
+
+    }   
+    boos = Booster(-1000, -1000, -1000, COLOR_RED);
+    island = Islands(0,-2, -5000, COLOR_ISLAND);
 
     for(i=0; i<n; ++i){
         if(i!=15){
@@ -244,11 +348,20 @@ void initGL(GLFWwindow *window, int width, int height) {
         }
         else{
             monster_x = ((((i+1)*rand()+i*584)%10000)/10) + 30;
-            monster_z = (rand() % (-450 + 1 + 5200))-5200;
+            monster_z = (rand() % (-450 + 1 + 4200))-4200;
             monster[i] = Monster(200, 0, -800, COLOR_MONSTERS,2);
         }
     }
-    fire = Fireball(can.position.x, -8, can.position.z, COLOR_BACKGROUND);
+    fire = Fireball(can.position.x, -30, can.position.z, COLOR_GIFTS);
+
+     for(i=0;i<5;++i){
+        health_x = ((((i+1)*rand()+i*584)%10000)/10) + 30;
+        health_z = (rand() % (-450 + 1 + 5200))-5200;
+        heal[i] = Health(health_x, 35, health_z, COLOR_GIFTS);
+
+     }
+
+
 
     // Create and compile our GLSL program from the shaders
     programID = LoadShaders("Sample_GL.vert", "Sample_GL.frag");
@@ -325,35 +438,47 @@ void camera_change(){
 
 
 int main(int argc, char **argv) {
-    srand(time(0));
-    int width  = 600;
-    int height = 600;
 
-    window = initGLFW(width, height);
+    // pid = fork();
+    // audio_init();
 
-    initGL (window, width, height);
+    // if(pid >= 0){
+        srand(time(0));
+        int width  = 600;
+        int height = 600;
 
-    /* Draw in loop */
-    while (!glfwWindowShouldClose(window)) {
-        // Process timers
+        window = initGLFW(width, height);
 
-        if (t60.processTick()) {
-            // 60 fps
-            // OpenGL Draw commands
-            draw();
-            // Swap Frame Buffer in double buffering
-            glfwSwapBuffers(window);
+        initGL (window, width, height);
 
-            tick_elements();
-            tick_input(window);
-            camera_change();
+
+        /* Draw in loop */
+        while (!glfwWindowShouldClose(window)) {
+                // Process timers
+
+            if (t60.processTick()) {
+                // 60 fps
+                // OpenGL Draw commands
+                draw();
+                // Swap Frame Buffer in double buffering
+                glfwSwapBuffers(window);
+
+                tick_elements();
+                tick_input(window);
+                camera_change();
+                displayScore();
+            }
+
+            // Poll for Keyboard and mouse events
+            glfwPollEvents();
         }
 
-        // Poll for Keyboard and mouse events
-        glfwPollEvents();
-    }
-
-    quit(window);
+        quit(window);
+    // }
+    // else{
+    //     printf("diosdf\n");
+    //     while(true) audio_play();
+    // }
 }
 
 bool detect_collision(bounding_box_t a, bounding_box_t b) {

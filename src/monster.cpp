@@ -9,6 +9,9 @@ Monster::Monster(float x, float y, float z, color_t color, int c) {
     this->box1.x = this->position.x;
     this->box1.y = this->position.y;
     this->box1.z = this->position.z;
+    this->box1.height = 30;
+    this->box1.width = 30;
+    this->box1.length = 30; 
     gravity = -0.1;
         if(c==1){
             static const GLfloat vertex_buffer_data[] = {

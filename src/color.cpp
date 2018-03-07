@@ -14,5 +14,6 @@ const color_t COLOR_CANNON = { 192, 57, 43};
 const color_t COLOR_BARREL = { 100, 30, 22};
 const color_t COLOR_GIFTS = { 125, 60, 152};
 const color_t COLOR_MONSTERS = { 186, 74, 0};
+const color_t COLOR_ISLAND = { 194, 178, 128};
 
 

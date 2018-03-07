@@ -9,6 +9,9 @@ Fireball::Fireball(float x, float y, float z, color_t color) {
     this->box1.x = this->position.x;
     this->box1.y = this->position.y;
     this->box1.z = this->position.z;
+    this->box1.height = 4;
+    this->box1.width = 4;
+    this->box1.length = 4; 
     static const GLfloat vertex_buffer_data[] = {
        -2.0f,-2.0f,-2.0f, // triangle 1 : begin
         -2.0f,-2.0f, 2.0f,
@@ -49,7 +52,7 @@ Fireball::Fireball(float x, float y, float z, color_t color) {
 
         
     };
-    this->object = create3DObject(GL_TRIANGLES, 36, vertex_buffer_data, COLOR_BACKGROUND, GL_FILL);
+    this->object = create3DObject(GL_TRIANGLES, 36, vertex_buffer_data, color, GL_FILL);
 
 
 }
@@ -78,9 +81,9 @@ void Fireball::tick() {
     this->box1.x = this->position.x;
     this->box1.y = this->position.y;
     this->box1.z = this->position.z;
-    this->box1.height = 2;
-    this->box1.width = 2;
-    this->box1.length = 2; 
+    this->box1.height = 4;
+    this->box1.width = 4;
+    this->box1.length = 4; 
     if(this->flag==1){
         this->position.y += speedy;
         speedy += gravity;

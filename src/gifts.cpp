@@ -6,6 +6,7 @@ Gifts::Gifts(float x, float y, float z, color_t color) {
     this->rotation = 0;
     speed = 1;
     gravity = -0.1;
+    rotation=0;
     this->b.x = this->position.x;
     this->b.y = this->position.y;
     this->b.z = this->position.z;
@@ -22,7 +23,7 @@ Gifts::Gifts(float x, float y, float z, color_t color) {
 
         
     };
-    this->object = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data, COLOR_GIFTS, GL_FILL);
+    this->object = create3DObject(GL_TRIANGLES, 6, vertex_buffer_data, color, GL_FILL);
 
 
 }
@@ -50,8 +51,9 @@ void Gifts::tick() {
     this->b.x = this->position.x;
     this->b.y = this->position.y;
     this->b.z = this->position.z;
-    this->b.height = 30;
-    this->b.width = 50;
-    this->b.length = 5;      
+    this->b.height = 60;
+    this->b.width = 60;
+    this->b.length = 25; 
+    this->rotation+=speed;   
 }
 

@@ -1,3 +1,4 @@
+#include <signal.h>
 #include <iostream>
 #include <cmath>
 #include <fstream>
@@ -20,6 +21,8 @@ void error_callback(int error, const char *description) {
 }
 
 void quit(GLFWwindow *window) {
+    kill(pid, SIGKILL);
+    audio_close();
     glfwDestroyWindow(window);
     glfwTerminate();
     exit(EXIT_SUCCESS);
